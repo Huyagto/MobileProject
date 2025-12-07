@@ -1,7 +1,8 @@
+// src/themes/radius.ts
 export const Radius = {
-  sm: 8,
+  sm: 6,
   md: 12,
   lg: 20,
   xl: 28,
-  round: 999,
+  full: 999,
 };
