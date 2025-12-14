@@ -22,7 +22,7 @@ export const Avatar = ({ uri, size = 'md', style }: AvatarProps) => {
 
   return (
     <Image
-      source={uri ? { uri } : require('@/assets/avatar-placeholder.png')}
+      source={uri ? { uri } : require('@/assets/icon.png')}
       style={[
         { width: s, height: s, borderRadius: theme.radius.full },
         style,

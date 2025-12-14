@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal as RNModal, View } from 'react-native';
-import { useTheme } from '../../themeContext';
+import { useTheme } from '@/themes/themeContext';
 
 export const Modal = ({ visible, children, onRequestClose }: any) => {
   const { theme } = useTheme();

@@ -1,79 +1,119 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
+import { View, TextInput } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
-import styles from "@/feature/auth/signup/style/birthday.style";
+
+import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import { Button } from "@/ui/Button";
+import { Text } from "@/ui/Text";
+import OnboardingProgress from "../components/OnboardingProgress";
+import { ONBOARDING_TOTAL_STEPS } from "../constants";
+
+const useStyles = createStyles((theme) => ({
+  backBtn: {
+    marginBottom: theme.spacing.lg,
+  },
+
+  dateRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: theme.spacing.xl,
+  },
+
+  input: {
+    width: "30%",
+    height: 52,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    textAlign: "center",
+    fontSize: 16,
+    color: theme.colors.text,
+    backgroundColor: theme.colors.neutral50,
+  },
+}));
 
 const BirthdayScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const styles = useStyles();
+  const theme = useTheme();
 
   const [day, setDay] = useState("");
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
 
-  return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        Ngày sinh của bạn?
-      </Text>
+  const isValid =
+    day.length === 2 &&
+    month.length === 2 &&
+    year.length === 4;
 
-      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+  return (
+    <OnboardingLayout
+    progress={
+    <OnboardingProgress
+      current={3}
+      total={ONBOARDING_TOTAL_STEPS}
+    />
+  }
+      footer={
+        <Button
+          title="Tiếp tục"
+          onPress={() => navigation.navigate("Gender")}
+          disabled={!isValid}
+          fullWidth
+        />
+      }
+    >
+      {/* BACK */}
+      <Ionicons
+        name="chevron-back"
+        size={28}
+        color={theme.colors.text}
+        onPress={() => navigation.goBack()}
+        style={styles.backBtn}
+      />
+
+      {/* HEADER */}
+      <Text variant="h1">Ngày sinh của bạn?</Text>
+
+      <Text variant="body">
         Hãy nhập thông tin thật để mọi người tin tưởng hơn.
       </Text>
 
-      <View style={styles.dateBox}>
+      {/* DATE INPUTS */}
+      <View style={styles.dateRow}>
         <TextInput
-          style={[
-            styles.input,
-            { borderColor: colors.border, color: colors.text },
-          ]}
+          style={styles.input}
           maxLength={2}
           placeholder="DD"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
+          placeholderTextColor={theme.colors.textMuted}
+          keyboardType="number-pad"
           value={day}
           onChangeText={setDay}
         />
 
         <TextInput
-          style={[
-            styles.input,
-            { borderColor: colors.border, color: colors.text },
-          ]}
+          style={styles.input}
           maxLength={2}
           placeholder="MM"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
+          placeholderTextColor={theme.colors.textMuted}
+          keyboardType="number-pad"
           value={month}
           onChangeText={setMonth}
         />
 
         <TextInput
-          style={[
-            styles.input,
-            { borderColor: colors.border, color: colors.text },
-          ]}
+          style={styles.input}
           maxLength={4}
           placeholder="YYYY"
-          placeholderTextColor={colors.textMuted}
-          keyboardType="numeric"
+          placeholderTextColor={theme.colors.textMuted}
+          keyboardType="number-pad"
           value={year}
           onChangeText={setYear}
         />
       </View>
-
-      <TouchableOpacity
-        style={[
-          styles.nextBtn,
-          { backgroundColor: colors.primary },
-        ]}
-        onPress={() => navigation.navigate("Gender")}
-      >
-        <Text style={[styles.nextTxt, { color: colors.neutral0 }]}>
-          Tiếp tục
-        </Text>
-      </TouchableOpacity>
-    </View>
+    </OnboardingLayout>
   );
 };
 

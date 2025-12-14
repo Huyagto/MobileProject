@@ -1,12 +1,22 @@
 // src/navigation/type.ts
 export type RootStackParamList = {
+  // ENTRY
   Start: undefined;
+  Login: undefined;
+
+  // SIGN UP FLOW
   SignUpPhone: undefined;
   OTPVerify: { phone: string };
-  CreateName: { phone: string; name?: string };
-  Birthday: { phone: string; name?: string };
-  Gender: { phone: string; name?: string; birthday?: string };
-  UploadPhotos: { phone?: string; name?: string; birthday?: string; gender?: string };
+
+  CreateName: undefined;
+  Birthday: undefined;
+  Gender: undefined;
+  UploadPhotos: undefined;
+  PreferenceGender: undefined;
+  Interest: undefined;
+  Habit: undefined;
+  Summary: undefined;
+
+  // MAIN APP
   Home: undefined;
-  Login: undefined;
 };

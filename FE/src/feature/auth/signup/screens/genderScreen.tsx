@@ -1,56 +1,111 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
-import styles from "@/feature/auth/signup/style/gender.style";
+
+import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import { Button } from "@/ui/Button";
+import { Text } from "@/ui/Text";
+import OnboardingProgress from "../components/OnboardingProgress";
+import { ONBOARDING_TOTAL_STEPS } from "../constants";
+
+const OPTIONS = ["Nam", "Nữ", "Khác"] as const;
+
+/* =======================
+   STYLES (SCREEN-LEVEL)
+======================= */
+const useStyles = createStyles((theme) => ({
+  backBtn: {
+    marginBottom: theme.spacing.lg,
+  },
+
+  option: {
+    paddingVertical: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    marginBottom: theme.spacing.md,
+    alignItems: "center",
+  },
+}));
 
 const GenderScreen = ({ navigation }: any) => {
-  const { theme } = useTheme();
-  const { colors } = theme;
+  const styles = useStyles();
+  const theme = useTheme();
 
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState<string>("");
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        Giới tính của bạn?
+    <OnboardingLayout
+    progress={
+    <OnboardingProgress
+      current={4}
+      total={ONBOARDING_TOTAL_STEPS}
+    />
+  }
+      footer={
+        <Button
+          title="Tiếp tục"
+          onPress={() => navigation.navigate("UploadPhotos")}
+          disabled={!selected}
+          fullWidth
+        />
+      }
+    >
+      {/* BACK */}
+      <Ionicons
+        name="chevron-back"
+        size={28}
+        color={theme.colors.text}
+        onPress={() => navigation.goBack()}
+        style={styles.backBtn}
+      />
+
+      {/* HEADER */}
+      <Text variant="h1">Giới tính của bạn?</Text>
+
+      <Text variant="body">
+        Thông tin này giúp chúng tôi gợi ý phù hợp hơn.
       </Text>
 
-      {["Nam", "Nữ", "Khác"].map((g) => {
-        const isActive = selected === g;
+      {/* OPTIONS */}
+      <View style={{ marginTop: theme.spacing.xl }}>
+        {OPTIONS.map((g) => {
+          const isActive = selected === g;
 
-        return (
-          <TouchableOpacity
-            key={g}
-            onPress={() => setSelected(g)}
-            style={[
-              styles.option,
-              {
-                borderColor: isActive ? colors.primary : colors.border,
-                backgroundColor: isActive ? colors.background2 : colors.background,
-              },
-            ]}
-          >
-            <Text
+          return (
+            <View
+              key={g}
               style={[
-                styles.optionText,
-                { color: isActive ? colors.primary : colors.text },
+                styles.option,
+                {
+                  borderColor: isActive
+                    ? theme.colors.primary
+                    : theme.colors.border,
+                  backgroundColor: isActive
+                    ? theme.colors.background2
+                    : theme.colors.background,
+                },
               ]}
+              onTouchEnd={() => setSelected(g)}
             >
-              {g}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-
-      <TouchableOpacity
-        style={[styles.nextBtn, { backgroundColor: colors.primary }]}
-        onPress={() => navigation.navigate("UploadPhotos")}
-      >
-        <Text style={[styles.nextTxt, { color: colors.neutral0 }]}>
-          Tiếp tục
-        </Text>
-      </TouchableOpacity>
-    </View>
+              <Text
+                variant="body"
+                style={{
+                  color: isActive
+                    ? theme.colors.primary
+                    : theme.colors.text,
+                }}
+              >
+                {g}
+              </Text>
+            </View>
+          );
+        })}
+      </View>
+    </OnboardingLayout>
   );
 };
 

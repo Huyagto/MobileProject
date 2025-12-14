@@ -17,7 +17,7 @@ export const TextTheme = {
       ...Typography.body,
       color: theme.colors.text,
     }),
-
+    
     caption: (theme: AppTheme) => ({
       ...Typography.subtitle,
       color: theme.colors.textSecondary,

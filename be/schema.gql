@@ -1,0 +1,23 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  phone: String!
+}
+
+type AuthResponse {
+  token: String!
+  user: User!
+  isNewUser: Boolean!
+}
+
+type Query {
+  healthCheck: String!
+}
+
+type Mutation {
+  sendOtp(phone: String!): Boolean!
+  verifyOtp(phone: String!, otp: String!): AuthResponse!
+}
