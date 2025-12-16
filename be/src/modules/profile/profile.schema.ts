@@ -17,28 +17,32 @@ export class Profile {
   @Prop()
   birthday: string;
 
-  @Prop()
-  preferenceGender: string;
+  @Prop({ type: [String] })
+preferenceGender: string[];
+
 
   @Prop({ type: [String] })
   interests: string[];
 
-  @Prop()
-  habit: string;
+ @Prop({ type: [String] })
+habit: string[];
   @Prop({
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
-    },
-    coordinates: {
-      type: [Number], // [lng, lat]
-    },
-  })
-  location?: {
-    type: "Point";
-    coordinates: [number, number];
-  };
+  type: {
+    type: String,
+    enum: ["Point"],
+    required: true,
+    default: "Point",
+  },
+  coordinates: {
+    type: [Number],      // [lng, lat]
+    required: true,
+    default: [0, 0],     // ✅ FIX QUAN TRỌNG
+  },
+})
+location: {
+  type: "Point";
+  coordinates: [number, number];
+};
 }
 
 /* 🔥 SCHEMA */

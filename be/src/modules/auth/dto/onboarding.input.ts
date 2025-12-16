@@ -1,5 +1,20 @@
-import { Field, InputType } from "@nestjs/graphql";
+import { InputType, Field, Float } from "@nestjs/graphql";
 
+/* ======================
+   LOCATION INPUT
+====================== */
+@InputType()
+export class LocationInput {
+  @Field()
+  type: "Point"; // "Point"
+
+   @Field(() => [Float])
+  coordinates: [number, number]; // [lng, lat]
+}
+
+/* ======================
+   ONBOARDING INPUT
+====================== */
 @InputType()
 export class OnboardingInput {
   @Field()
@@ -11,12 +26,15 @@ export class OnboardingInput {
   @Field()
   birthday: string;
 
-  @Field()
-  preferenceGender: string;
-
   @Field(() => [String])
   interests: string[];
 
-  @Field()
-  habit: string;
+  @Field(() => [String])
+  habit: string[];
+
+  @Field(() => [String])
+  preferenceGender: string[];
+
+  @Field(() => LocationInput)
+  location: LocationInput;
 }

@@ -11,42 +11,31 @@ export class ProfileService {
     private readonly profileModel: Model<ProfileDocument>,
   ) {}
 
-  /* =========================
-     GET PROFILE BY USER
-  ========================== */
   async getByUser(userId: string | Types.ObjectId) {
     return this.profileModel.findOne({
       userId: new Types.ObjectId(userId),
     });
   }
 
-  /* =========================
-     CREATE OR UPDATE PROFILE
-     (dùng cho onboarding / edit profile)
-  ========================== */
   async createOrUpdate(data: {
     userId: Types.ObjectId;
     name: string;
     gender: string;
     birthday: string;
-    preferenceGender: string;
+    preferenceGender: string[];
     interests: string[];
-    habit: string;
+    habit: string[];
+    location: {
+      type: "Point";
+      coordinates: [number, number];
+    };
   }) {
     let profile = await this.profileModel.findOne({
       userId: data.userId,
     });
 
     if (!profile) {
-      profile = new this.profileModel({
-        userId: data.userId,
-        name: data.name,
-        gender: data.gender,
-        birthday: data.birthday,
-        preferenceGender: data.preferenceGender,
-        interests: data.interests,
-        habit: data.habit,
-      });
+      profile = new this.profileModel(data);
     } else {
       profile.name = data.name;
       profile.gender = data.gender;
@@ -54,76 +43,66 @@ export class ProfileService {
       profile.preferenceGender = data.preferenceGender;
       profile.interests = data.interests;
       profile.habit = data.habit;
+
+      if (data.location?.coordinates?.length === 2) {
+        profile.location = data.location;
+      }
     }
 
     await profile.save();
     return profile;
   }
+  async updateBasicProfile(
+  userId: string | Types.ObjectId,
+  data: {
+    name?: string;
+    gender?: string;
+    bio?: string;
+  },
+) {
+  return this.profileModel.findOneAndUpdate(
+    { userId: new Types.ObjectId(userId) },
+    { $set: data },
+    { new: true },
+  );
+}
 
-  /* =========================
-     UPDATE BASIC PROFILE
-     (name, gender, bio...)
-  ========================== */
-  async upsert(
-    userId: string | Types.ObjectId,
-    data: {
-      name?: string;
-      gender?: string;
-      bio?: string;
-    },
-  ) {
-    return this.profileModel.findOneAndUpdate(
-      { userId: new Types.ObjectId(userId) },
-      { $set: data },
-      { new: true, upsert: true },
-    );
-  }
-
-  /* =========================
-     UPDATE LOCATION (GPS)
-     ⚠️ lng trước, lat sau
-  ========================== */
   async updateLocation(
     userId: string | Types.ObjectId,
     lat: number,
     lng: number,
   ) {
-    await this.profileModel.updateOne(
+    return this.profileModel.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       {
         $set: {
           location: {
             type: "Point",
-            coordinates: [lng, lat], // ❗ thứ tự QUAN TRỌNG
+            coordinates: [lng, lat],
           },
         },
       },
+      { new: true },
     );
-
-    return true;
   }
 
-  /* =========================
-     FIND NEARBY PROFILES
-     (CORE MATCH LOGIC)
-  ========================== */
   async findNearbyProfiles(params: {
     userId: Types.ObjectId;
     lat: number;
     lng: number;
-    maxDistance?: number; // mét
+    maxDistance?: number;
     preferenceGender?: string;
   }) {
     const {
       userId,
       lat,
       lng,
-      maxDistance = 5000, // mặc định 5km
+      maxDistance = 5000,
       preferenceGender,
     } = params;
 
     const query: any = {
-      userId: { $ne: userId }, // ❌ loại trừ chính mình
+      userId: { $ne: new Types.ObjectId(userId) },
       location: {
         $near: {
           $geometry: {

@@ -59,14 +59,16 @@ async submitOnboarding(
 
   // 3️⃣ Create / update profile
   await this.profileService.createOrUpdate({
-    userId: user._id,
-    name: input.name,
-    gender: input.gender,
-    birthday: input.birthday,
-    preferenceGender: input.preferenceGender,
-    interests: input.interests,
-    habit: input.habit,
-  });
+  userId: user._id,
+  name: input.name,
+  gender: input.gender,
+  birthday: input.birthday,
+  preferenceGender: input.preferenceGender,
+  interests: input.interests,
+  habit: input.habit,
+  location: input.location, // 🔥 FIX QUAN TRỌNG NHẤT
+});
+
 
   // 4️⃣ Create REAL access token
   const accessToken = this.jwtService.sign(

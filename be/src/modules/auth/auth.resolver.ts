@@ -42,7 +42,7 @@ export class AuthResolver {
   submitOnboarding(
     @Args("signupToken") signupToken: string,
     @Args("input") input: OnboardingInput,
-  ) {
+  ): Promise<AuthPayload> {
     return this.authService.submitOnboarding(signupToken, input);
   }
 }
