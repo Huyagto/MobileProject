@@ -3,6 +3,7 @@ import { AuthService } from "./auth.service";
 import { AuthResponse } from "./dto/auth-response.type";
 import { AuthPayload } from "./dto/auth.payload";
 import { OnboardingInput } from "./dto/onboarding.input";
+import { SendOtpResponse } from "./dto/send-otp.response";
 
 @Resolver()
 export class AuthResolver {
@@ -13,36 +14,36 @@ export class AuthResolver {
     return "OK";
   }
 
-  /* ======================
-     SEND OTP
-  ====================== */
-  @Mutation(() => Boolean)
+  /* ===== SEND OTP (CHECK USER EXISTS) ===== */
+  @Mutation(() => SendOtpResponse)
   sendOtp(@Args("phone") phone: string) {
     return this.authService.sendOtp(phone);
   }
 
-  /* ======================
-     VERIFY OTP
-     → trả signupToken
-  ====================== */
+  /* ===== SIGNUP VERIFY OTP ===== */
   @Mutation(() => AuthResponse)
-  verifyOtp(
+  verifySignupOtp(
     @Args("phone") phone: string,
     @Args("otp") otp: string,
   ) {
-    return this.authService.verifyOtp(phone, otp);
+    return this.authService.verifySignupOtp(phone, otp);
   }
 
-  /* ======================
-     SUBMIT ONBOARDING
-     → tạo user + profile
-     → trả accessToken
-  ====================== */
+  /* ===== LOGIN VERIFY OTP ===== */
+  @Mutation(() => AuthPayload)
+  verifyLoginOtp(
+    @Args("phone") phone: string,
+    @Args("otp") otp: string,
+  ) {
+    return this.authService.verifyLoginOtp(phone, otp);
+  }
+
+  /* ===== SUBMIT ONBOARDING ===== */
   @Mutation(() => AuthPayload)
   submitOnboarding(
     @Args("signupToken") signupToken: string,
     @Args("input") input: OnboardingInput,
-  ): Promise<AuthPayload> {
+  ) {
     return this.authService.submitOnboarding(signupToken, input);
   }
 }

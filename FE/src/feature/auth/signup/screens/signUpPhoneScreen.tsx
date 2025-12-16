@@ -1,30 +1,29 @@
 // src/features/auth/signup/screens/SignUpPhoneScreen.tsx
 import React, { useState } from "react";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+
 import { RootStackParamList } from "@/navigation/type";
 import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import OnboardingLayout from "@/feature/auth/layouts/AuthLayout";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
-import useDetectCountry from "@/feature/auth/signup/hooks/useDetectCountry";
-import { useAuth } from "@/feature/auth/signup/hooks/useAuth";
+
+import { useSignup } from "@/feature/auth/signup/hooks/useSignup";
 import { normalizePhone } from "@/utils/phone";
-import PhoneInput from "@/feature/auth/signup/components/phoneInput";
-import CountryPicker from "@/feature/auth/signup/components/countryPicker";
+import PhoneInput from "@/feature/auth/components/phoneInput";
+import CountryPicker from "@/feature/auth/components/countryPicker";
 import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
+import useDetectCountry from "@/feature/auth/hooks/useDetectCountry";
 
 type Nav = NativeStackScreenProps<RootStackParamList, "SignUpPhone">;
-/* =======================
-   STYLES (SCREEN-LEVEL)
-======================= */
+
 const useStyles = createStyles((theme) => ({
   backBtn: {
     marginBottom: theme.spacing.lg,
   },
-
   inputBlock: {
     marginTop: theme.spacing.xl,
   },
@@ -35,38 +34,66 @@ const SignUpPhoneScreen = ({ navigation }: Nav) => {
   const theme = useTheme();
 
   const { country, setCountry } = useDetectCountry();
-  const { sendOtp, loading } = useAuth();
+  const { sendOtp, loading } = useSignup();
+  const { update } = useOnboarding();
 
   const [phone, setPhone] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
 
   const isValid = phone.replace(/\D/g, "").length >= 8;
-  const { update } = useOnboarding();
+
   const onNext = async () => {
-    if (loading || !isValid) return;
+  console.log("CLICK NEXT");
 
-    const normalizedPhone = normalizePhone(country.dial, phone);
-    console.log("📱 FE normalizedPhone:", normalizedPhone);
+  if (!isValid || loading) return;
 
-    await sendOtp(normalizedPhone);
+  const normalizedPhone = normalizePhone(
+    country.dial,
+    phone
+  );
+  console.log("NORMALIZED PHONE:", normalizedPhone);
+
+  try {
+    const res = await sendOtp(normalizedPhone);
+
+    // ❌ ĐÃ TỒN TẠI → KHÔNG CHO SIGNUP
+    if (res.userExists) {
+      Alert.alert(
+        "Số điện thoại đã tồn tại",
+        "Vui lòng đăng nhập"
+      );
+      return;
+    }
+
+    // ✅ CHƯA TỒN TẠI → TIẾP TỤC SIGNUP
     update({ phone: normalizedPhone });
+
     navigation.navigate("OTPVerify", {
       phone: normalizedPhone,
+      flow: "signup",
     });
-  };
+  } catch (e) {
+    Alert.alert(
+      "Không gửi được OTP",
+      "Vui lòng thử lại"
+    );
+  }
+};
+
+
 
   return (
     <OnboardingLayout
       footer={
         <Button
-      title="Tiếp theo"
-      onPress={onNext}
-      disabled={!isValid || loading}
-      fullWidth
-    />
+          title="Tiếp theo"
+          onPress={onNext}
+          disabled={!isValid || loading}
+          fullWidth
+        />
       }
     >
-      {/* BACK BUTTON */}
+      {/* BACK */}
       <Ionicons
         name="chevron-back"
         size={28}
@@ -75,14 +102,9 @@ const SignUpPhoneScreen = ({ navigation }: Nav) => {
         style={styles.backBtn}
       />
 
-      {/* HEADER */}
-      <Text variant="h1">
-        Bạn có thể chia sẻ số điện thoại không?
-      </Text>
-
-      <Text variant="body">
-        Chúng tôi sẽ gửi mã xác thực cho bạn.
-      </Text>
+      {/* TEXT */}
+      <Text variant="h1">Bạn có thể chia sẻ số điện thoại không?</Text>
+      <Text variant="body">Chúng tôi sẽ gửi mã xác thực cho bạn.</Text>
 
       {/* PHONE INPUT */}
       <View style={styles.inputBlock}>
@@ -94,7 +116,7 @@ const SignUpPhoneScreen = ({ navigation }: Nav) => {
         />
       </View>
 
-      {/* COUNTRY PICKER */}
+      {/* COUNTRY PICKER MODAL */}
       <CountryPicker
         visible={openPicker}
         onClose={() => setOpenPicker(false)}

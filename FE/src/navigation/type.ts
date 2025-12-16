@@ -6,7 +6,10 @@ export type RootStackParamList = {
 
   // SIGN UP FLOW
   SignUpPhone: undefined;
-  OTPVerify: { phone: string };
+  OTPVerify: {
+    phone: string;
+    flow: "signin" | "signup";
+  };
 
   CreateName: undefined;
   Birthday: undefined;

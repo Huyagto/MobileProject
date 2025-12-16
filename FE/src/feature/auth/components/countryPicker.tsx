@@ -7,9 +7,7 @@ import {
 } from "react-native";
 
 import { createStyles } from "@/themes/helper/createStyles";
-import { useTheme } from "@/themes/themeContext";
 import { Text } from "@/ui/Text";
-
 import { countries } from "@/utils/countries";
 
 type Country = {
@@ -23,11 +21,9 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   setCountry: (c: Country) => void;
+  selectedCode?: string;
 };
 
-/* =======================
-   STYLES (COMPONENT-LEVEL)
-======================= */
 const useStyles = createStyles((theme) => ({
   overlay: {
     flex: 1,
@@ -41,6 +37,7 @@ const useStyles = createStyles((theme) => ({
     borderTopLeftRadius: theme.radius.xl,
     borderTopRightRadius: theme.radius.xl,
     paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.xl, // ✅ safe area
   },
 
   title: {
@@ -57,6 +54,10 @@ const useStyles = createStyles((theme) => ({
     borderBottomColor: theme.colors.border,
   },
 
+  activeItem: {
+    backgroundColor: theme.colors.neutral50,
+  },
+
   flag: {
     fontSize: 22,
     marginRight: theme.spacing.md,
@@ -71,15 +72,22 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const CountryPicker = ({ visible, onClose, setCountry }: Props) => {
+const CountryPicker = ({
+  visible,
+  onClose,
+  setCountry,
+  selectedCode,
+}: Props) => {
   const styles = useStyles();
-  const theme = useTheme();
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <Pressable style={styles.overlay} onPress={onClose}>
         {/* MODAL CONTENT */}
-        <Pressable style={styles.container}>
+        <Pressable
+          style={styles.container}
+          onPress={() => {}}
+        >
           <Text variant="h2" style={styles.title}>
             Chọn quốc gia
           </Text>
@@ -90,7 +98,11 @@ const CountryPicker = ({ visible, onClose, setCountry }: Props) => {
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <Pressable
-                style={styles.countryItem}
+                style={[
+                  styles.countryItem,
+                  item.code === selectedCode &&
+                    styles.activeItem,
+                ]}
                 onPress={() => {
                   setCountry(item);
                   onClose();

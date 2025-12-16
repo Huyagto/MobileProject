@@ -5,10 +5,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
 
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import OnboardingLayout from "@/feature/auth/layouts/AuthLayout";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
+import { ONBOARDING_TOTAL_STEPS } from "../constants";
+import OnboardingProgress from "../components/OnboardingProgress";
 
 const HABITS = ["Không hút thuốc", "Uống rượu", "Tập thể thao", "Ngủ sớm"];
 
@@ -29,6 +31,12 @@ const HabitScreen = ({ navigation }: any) => {
 
   return (
     <OnboardingLayout
+     progress={
+    <OnboardingProgress
+      current={7}
+      total={ONBOARDING_TOTAL_STEPS}
+    />
+  }
       footer={
         <Button
           title="Tiếp tục"

@@ -1,11 +1,18 @@
-// utils/phone.ts
+// src/utils/phone.ts
 export const normalizePhone = (dial: string, phone: string) => {
-  const raw = phone.replace(/\D/g, "");
+  // dial: "84" | "+84"
+  const cleanDial = dial.replace("+", "");
+  let raw = phone.replace(/\D/g, "");
 
-  // 🇻🇳 Việt Nam
-  if (dial === "+84" && raw.startsWith("0")) {
-    return `+84${raw.slice(1)}`;
+  // Nếu user đã nhập +84...
+  if (raw.startsWith(cleanDial)) {
+    return `+${raw}`;
   }
 
-  return `${dial}${raw}`;
+  // 🇻🇳 Việt Nam: bỏ số 0 đầu
+  if (cleanDial === "84" && raw.startsWith("0")) {
+    raw = raw.slice(1);
+  }
+
+  return `+${cleanDial}${raw}`;
 };

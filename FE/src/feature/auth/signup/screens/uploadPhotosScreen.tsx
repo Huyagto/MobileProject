@@ -6,7 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
 
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import OnboardingLayout from "@/feature/auth/layouts/AuthLayout";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
@@ -113,7 +113,7 @@ const UploadPhotosScreen = ({ navigation }: any) => {
     <OnboardingLayout
     progress={
     <OnboardingProgress
-      current={5}
+      current={4}
       total={ONBOARDING_TOTAL_STEPS}
     />
   }

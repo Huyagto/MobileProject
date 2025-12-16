@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
 
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import OnboardingLayout from "@/feature/auth/layouts/AuthLayout";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
@@ -37,7 +37,7 @@ const PreferenceGenderScreen = ({ navigation }: any) => {
     <OnboardingLayout
     progress={
     <OnboardingProgress
-      current={6}
+      current={5}
       total={ONBOARDING_TOTAL_STEPS}
     />
   }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, TextInput, Pressable } from "react-native";
 
 import { createStyles } from "@/themes/helper/createStyles";
@@ -14,19 +14,24 @@ type Props = {
   openPicker: () => void;
 };
 
-/* =======================
-   STYLES (COMPONENT-LEVEL)
-======================= */
 const useStyles = createStyles((theme) => ({
-  phoneRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-    paddingBottom: theme.spacing.sm,
+  wrapper: {
+    borderWidth: 1,
+    borderRadius: theme.radius.md,
+    paddingHorizontal: theme.spacing.md,
+    backgroundColor: theme.colors.neutral50,
   },
 
-  countrySelect: {
+  focused: {
+    borderColor: theme.colors.primary,
+  },
+
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  countryBtn: {
     flexDirection: "row",
     alignItems: "center",
     paddingRight: theme.spacing.md,
@@ -37,23 +42,34 @@ const useStyles = createStyles((theme) => ({
 
   phoneInput: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
+    paddingVertical: theme.spacing.md,
     color: theme.colors.text,
-    paddingVertical: theme.spacing.sm,
   },
 }));
 
-const PhoneInput = ({ phone, setPhone, country, openPicker }: Props) => {
+const PhoneInput = ({
+  phone,
+  setPhone,
+  country,
+  openPicker,
+}: Props) => {
   const styles = useStyles();
   const theme = useTheme();
+  const [focused, setFocused] = useState(false);
 
   return (
-    <View>
-      <View style={styles.phoneRow}>
+    <View
+      style={[
+        styles.wrapper,
+        focused && styles.focused,
+      ]}
+    >
+      <View style={styles.row}>
         {/* COUNTRY */}
-        <Pressable onPress={openPicker} style={styles.countrySelect}>
+        <Pressable onPress={openPicker} style={styles.countryBtn}>
           <Text variant="body">
-            {country.flag} {country.dial} ▼
+            {country.flag} {country.dial}
           </Text>
         </Pressable>
 
@@ -61,10 +77,14 @@ const PhoneInput = ({ phone, setPhone, country, openPicker }: Props) => {
         <TextInput
           style={styles.phoneInput}
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={(v) =>
+            setPhone(v.replace(/\D/g, ""))
+          }
           keyboardType="number-pad"
           placeholder="Số điện thoại"
           placeholderTextColor={theme.colors.textMuted}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
         />
       </View>
     </View>

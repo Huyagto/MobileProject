@@ -1,11 +1,12 @@
-import { Spacing, Radius } from '@/themes';
+import { createStyles } from "@/themes/helper/createStyles";
 
-export const CardTheme = {
-  container: (theme: any) => ({
+export const useStyles = createStyles((theme) => ({
+  container: {
     backgroundColor: theme.colors.neutral0,
-    padding: Spacing.lg,
-    borderRadius: Radius.lg,
-    borderColor: theme.colors.neutral100,
-    borderWidth: 1,
-  }),
-};
+    borderRadius: theme.radius.lg,
+    padding: theme.spacing.md,
+
+    // ✅ SPREAD shadow object
+    ...theme.shadows.md,
+  },
+}));

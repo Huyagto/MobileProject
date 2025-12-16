@@ -1,21 +1,34 @@
-import React from 'react';
-import { Text as RNText } from 'react-native';
-import { useTheme } from '@/themes/themeContext';
-import { TextTheme, TextVariant } from './text.theme';
+import React from "react";
+import {
+  Text as RNText,
+  TextProps as RNTextProps,
+} from "react-native";
 
-type Props = {
+import { useTheme } from "@/themes/themeContext";
+import { TextTheme, TextVariant } from "./text.theme";
+
+type Props = RNTextProps & {
   variant?: TextVariant;
-  children: React.ReactNode;
-  style?: any;
 };
 
-export const Text = ({ variant = 'body', children, style }: Props) => {
-  const theme = useTheme();
+export const Text = ({
+  variant = "body",
+  style,
+  children,
+  ...rest
+}: Props) => {
+  const { theme }= useTheme();
 
-  // TS nhận dạng key đúng → HẾT LỖI
   const v = TextTheme.variants[variant](theme);
 
-  return <RNText style={[v, style]}>{children}</RNText>;
+  return (
+    <RNText
+      {...rest}
+      style={[v, style]}
+    >
+      {children}
+    </RNText>
+  );
 };
 
 export default Text;

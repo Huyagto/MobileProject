@@ -1,5 +1,9 @@
 import React from "react";
-import { TouchableOpacity, Text } from "react-native";
+import {
+  TouchableOpacity,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useTheme } from "@/themes/themeContext";
 import { ButtonTheme, ButtonVariant } from "./button.theme";
@@ -10,8 +14,9 @@ type ButtonProps = {
   title: string;
   variant?: ButtonVariant;
   style?: any;
-  disabled?: boolean;          // ✅ thêm
-  fullWidth?: boolean;         // ✅ thêm
+  disabled?: boolean;
+  fullWidth?: boolean;
+  loading?: boolean; // ✅ thêm
   onPress?: () => void | Promise<void>;
 };
 
@@ -21,34 +26,46 @@ export const Button = ({
   style,
   disabled = false,
   fullWidth = false,
+  loading = false,
   onPress,
 }: ButtonProps) => {
   const { theme } = useTheme();
-  const { handlePress } = useButton({ onPress, disabled });
+
+  const isDisabled = disabled || loading;
+  const { handlePress } = useButton({
+    onPress,
+    disabled: isDisabled,
+  });
 
   const v = ButtonTheme.variants[variant](theme);
 
   const textStyle = {
     ...(ButtonTheme.text as any),
     color: v.textColor,
-    opacity: disabled ? 0.6 : 1,
+    opacity: isDisabled ? 0.6 : 1,
   };
 
   const containerStyle = [
     ButtonTheme.base,
     v.container,
-    fullWidth && { width: "100%" },   // ✅ full width
-    disabled && { opacity: 0.6 },      // ✅ disabled
+    fullWidth && { width: "100%" },
+    isDisabled && { opacity: 0.6 },
     style,
   ];
 
   const isGradient = Array.isArray(v.gradient);
 
+  const content = loading ? (
+    <ActivityIndicator color={v.textColor} />
+  ) : (
+    <Text style={textStyle}>{title}</Text>
+  );
+
   return (
     <TouchableOpacity
       onPress={handlePress}
       activeOpacity={0.85}
-      disabled={disabled}
+      disabled={isDisabled}
       style={!isGradient ? (containerStyle as any) : undefined}
     >
       {isGradient ? (
@@ -58,10 +75,10 @@ export const Button = ({
           end={{ x: 1, y: 1 }}
           style={containerStyle as any}
         >
-          <Text style={textStyle}>{title}</Text>
+          {content}
         </LinearGradient>
       ) : (
-        <Text style={textStyle}>{title}</Text>
+        content
       )}
     </TouchableOpacity>
   );

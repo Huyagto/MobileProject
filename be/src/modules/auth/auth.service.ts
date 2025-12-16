@@ -1,94 +1,115 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { RedisService } from '@/infra/redis/redis.service';
-import { SmsService } from '@/infra/sms/sms.service';
-import { UserService } from '@/modules/users/user.service';
-import { normalizePhone } from '@/utils/phone.util';
-import { OnboardingInput } from './dto/onboarding.input';
-import { AuthPayload } from './dto/auth.payload';
-import { ProfileService } from '../profile/profile.service';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { RedisService } from "@/infra/redis/redis.service";
+import { UserService } from "@/modules/users/user.service";
+import { ProfileService } from "@/modules/profile/profile.service";
+import { normalizePhone } from "@/utils/phone.util";
+import { OnboardingInput } from "./dto/onboarding.input";
+import { AuthPayload } from "./dto/auth.payload";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly redisService: RedisService,
-    private readonly profileService: ProfileService,
     private readonly userService: UserService,
+    private readonly profileService: ProfileService,
     private readonly jwtService: JwtService,
   ) {}
 
-  // 📲 Gửi OTP
-  async sendOtp(phone: string): Promise<boolean> {
-    const normalized = normalizePhone(phone);
-  console.log("🔥 sendOtp called with phone:", phone);
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log(`🔥 DEV OTP for ${phone}: ${otp}`);
-  await this.redisService.setOtp(normalized, otp);
-  return true;
-}
-async verifyOtp(phone: string, otp: string) {
+  /* ===== SEND OTP (CHUNG) ===== */
+ async sendOtp(phone: string): Promise<{ userExists: boolean }> {
   const normalized = normalizePhone(phone);
 
-  const savedOtp = await this.redisService.getOtp(normalized);
-  if (!savedOtp || savedOtp !== otp) {
-    throw new UnauthorizedException("OTP invalid");
+  const user = await this.userService.findByPhone(normalized);
+  const userExists = !!user;
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  await this.redisService.setOtp(normalized, otp);
+
+  console.log(`🔥 OTP ${normalized}: ${otp}`);
+
+  return { userExists };
+}
+
+
+  /* ===== SIGNUP OTP ===== */
+  async verifySignupOtp(phone: string, otp: string) {
+    const normalized = normalizePhone(phone);
+
+    const savedOtp = await this.redisService.getOtp(normalized);
+    if (!savedOtp || savedOtp !== otp) {
+      throw new UnauthorizedException("OTP invalid");
+    }
+
+    await this.redisService.deleteOtp(normalized);
+
+    return {
+      signupToken: this.jwtService.sign(
+        { phone: normalized },
+        { expiresIn: "15m" },
+      ),
+    };
   }
 
-  await this.redisService.deleteOtp(normalized);
+  /* ===== LOGIN OTP ===== */
+  async verifyLoginOtp(phone: string, otp: string): Promise<AuthPayload> {
+    const normalized = normalizePhone(phone);
 
-  return {
-    signupToken: this.jwtService.sign(
-      { phone: normalized },   // ✅ CHUẨN
-      { expiresIn: "15m" }
-    ),
-  };
-}
-async submitOnboarding(
-  signupToken: string,
-  input: OnboardingInput,
-): Promise<AuthPayload> {
-  // 1️⃣ Verify signupToken
-  const payload = this.jwtService.verify(signupToken);
-  const phone = payload.phone;
+    const savedOtp = await this.redisService.getOtp(normalized);
+    if (!savedOtp || savedOtp !== otp) {
+      throw new UnauthorizedException("OTP invalid");
+    }
 
-  // 2️⃣ Find or create user
-  let user = await this.userService.findByPhone(phone);
-  if (!user) {
-    user = await this.userService.create({ phone });
+    await this.redisService.deleteOtp(normalized);
+
+    const user = await this.userService.findByPhone(normalized);
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
+    const accessToken = this.jwtService.sign(
+      { sub: user._id.toString(), phone: normalized },
+      { expiresIn: "7d" },
+    );
+
+    return {
+      accessToken,
+      user: {
+        id: user._id.toString(),
+        phone: user.phone,
+      },
+    };
   }
 
-  // 3️⃣ Create / update profile
-  await this.profileService.createOrUpdate({
-  userId: user._id,
-  name: input.name,
-  gender: input.gender,
-  birthday: input.birthday,
-  preferenceGender: input.preferenceGender,
-  interests: input.interests,
-  habit: input.habit,
-  location: input.location, // 🔥 FIX QUAN TRỌNG NHẤT
-});
+  /* ===== SUBMIT ONBOARDING ===== */
+  async submitOnboarding(
+    signupToken: string,
+    input: OnboardingInput,
+  ): Promise<AuthPayload> {
+    const payload = this.jwtService.verify(signupToken);
+    const phone = payload.phone;
 
+    let user = await this.userService.findByPhone(phone);
+    if (!user) {
+      user = await this.userService.create({ phone });
+    }
 
-  // 4️⃣ Create REAL access token
-  const accessToken = this.jwtService.sign(
-    {
-      sub: user._id.toString(),
-      phone,
-    },
-    { expiresIn: "7d" },
-  );
+    await this.profileService.createOrUpdate({
+      userId: user._id,
+      ...input,
+    });
 
-  // 5️⃣ Return payload
-  return {
-  accessToken,
-  user: {
-    id: user._id.toString(),
-    phone: user.phone,
-  },
-};
+    const accessToken = this.jwtService.sign(
+      { sub: user._id.toString(), phone },
+      { expiresIn: "7d" },
+    );
+
+    return {
+      accessToken,
+      user: {
+        id: user._id.toString(),
+        phone: user.phone,
+      },
+    };
+  }
 }
-
-
-}
-

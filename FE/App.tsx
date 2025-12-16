@@ -2,15 +2,15 @@
 import React from "react";
 import AppNavigator from "@/navigation/AppNavigator";
 import { ThemeProvider } from "@/themes/themeContext";
-import { ApolloProvider } from "@apollo/client";
-import client from "@/graphql/apolloClient";
+import { ApolloClient, ApolloProvider } from "@apollo/client";
+import apolloClient from "@/graphql/apolloClient";
 import { OnboardingProvider } from "@/feature/auth/signup/context/OnboardingContext";
 
 export default function App() {
   return (
     <ThemeProvider>
       <OnboardingProvider>
-      <ApolloProvider client={client}> 
+      <ApolloProvider client={apolloClient}> 
         <AppNavigator/> 
         </ApolloProvider>
         </OnboardingProvider>

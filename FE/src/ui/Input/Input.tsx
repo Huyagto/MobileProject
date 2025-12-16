@@ -1,6 +1,13 @@
 import React from "react";
-import { View, TextInput, Text, StyleSheet, ViewStyle } from "react-native";
-import { useTheme } from "../../themes/themeContext";
+import {
+  View,
+  TextInput,
+  Text,
+  StyleSheet,
+  ViewStyle,
+  TextInputProps,
+} from "react-native";
+import { useTheme } from "@/themes/themeContext";
 
 type Props = {
   value?: string;
@@ -9,6 +16,11 @@ type Props = {
   label?: string;
   style?: ViewStyle;
   secureTextEntry?: boolean;
+
+  // ✅ thêm
+  keyboardType?: TextInputProps["keyboardType"];
+  autoFocus?: boolean;
+  returnKeyType?: TextInputProps["returnKeyType"];
 };
 
 export const Input = ({
@@ -18,12 +30,15 @@ export const Input = ({
   label,
   style,
   secureTextEntry,
+  keyboardType,
+  autoFocus,
+  returnKeyType,
 }: Props) => {
   const { colors, spacing, radius, typography } = useTheme();
 
   return (
     <View style={[{ width: "100%" }, style]}>
-      {label ? (
+      {label && (
         <Text
           style={[
             typography.body,
@@ -35,13 +50,16 @@ export const Input = ({
         >
           {label}
         </Text>
-      ) : null}
+      )}
 
       <TextInput
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
         secureTextEntry={secureTextEntry}
+        keyboardType={keyboardType}
+        autoFocus={autoFocus}
+        returnKeyType={returnKeyType}
         placeholderTextColor={colors.textMuted}
         style={[
           styles.input,

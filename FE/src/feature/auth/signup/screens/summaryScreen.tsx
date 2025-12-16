@@ -3,7 +3,7 @@ import { Alert } from "react-native";
 import * as Location from "expo-location";
 
 import { Button, Text } from "@/ui";
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import OnboardingLayout from "@/feature/auth/layouts/AuthLayout";
 import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
 import { useSubmitOnboarding } from "@/feature/auth/signup/hooks/useSubmitOnboarding";
 
@@ -93,9 +93,13 @@ const SummaryScreen = ({ navigation }: any) => {
     >
       <Text variant="h1">Xác nhận thông tin</Text>
 
-      <Text>{data.name}</Text>
-      <Text>{data.phone}</Text>
-      <Text>{data.gender}</Text>
+      <Text>{data.name || ""}</Text>
+
+<Text>{data.phone || ""}</Text>
+
+<Text>{data.gender ?? ""}</Text>
+
+
     </OnboardingLayout>
   );
 };
