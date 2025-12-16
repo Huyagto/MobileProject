@@ -1,26 +1,81 @@
-import { Button, Text } from "@/ui";
-import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
-import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import React from "react";
 import { Alert } from "react-native";
+import * as Location from "expo-location";
+
+import { Button, Text } from "@/ui";
+import OnboardingLayout from "@/feature/auth/signup/layouts/OnboardingLayout";
+import { useOnboarding } from "@/feature/auth/signup/context/OnboardingContext";
 import { useSubmitOnboarding } from "@/feature/auth/signup/hooks/useSubmitOnboarding";
 
 const SummaryScreen = ({ navigation }: any) => {
-  const { data, reset } = useOnboarding(); // CONTEXT
-const { submitOnboarding, loading } = useSubmitOnboarding(); // GRAPHQL
+  const { data, reset } = useOnboarding();
+  const { submitOnboarding, loading } = useSubmitOnboarding();
+
+  /* ======================
+     GET CURRENT LOCATION
+  ====================== */
+  const getCurrentLocation = async () => {
+    const { status } =
+      await Location.requestForegroundPermissionsAsync();
+
+    if (status !== "granted") {
+      throw new Error("Location permission denied");
+    }
+
+    const loc = await Location.getCurrentPositionAsync({
+      accuracy: Location.Accuracy.High,
+    });
+
+    return {
+      latitude: loc.coords.latitude,
+      longitude: loc.coords.longitude,
+    };
+  };
+
+  /* ======================
+     SUBMIT ONBOARDING
+  ====================== */
   const onFinish = async () => {
     try {
-      await submitOnboarding(data);
+      // 🔥 LẤY GPS
+      const { latitude, longitude } =
+        await getCurrentLocation();
 
-      reset(); // ✅ clear onboarding context
+      // 🔥 MAP DATA + GEOJSON
+      const input = {
+        name: data.name,
+        gender: data.gender,
+        birthday: data.birthday,
+        preferenceGender: data.preferenceGender,
+        interests: data.interests,
+        habit: data.habits,
+
+        // ✅ GEOJSON CHUẨN (Mongo 2dsphere)
+        location: {
+          type: "Point",
+          coordinates: [longitude, latitude], // lng, lat
+        },
+      };
+
+      console.log("📤 submitOnboarding input:", input);
+
+      await submitOnboarding(input);
+
+      reset();
 
       navigation.reset({
         index: 0,
         routes: [{ name: "Home" }],
       });
-    } catch (e) {
+    } catch (e: any) {
+      console.log(
+        "❌ submitOnboarding error:",
+        e?.graphQLErrors || e?.message || e
+      );
+
       Alert.alert(
         "Lỗi",
-        "Không thể hoàn tất đăng ký, vui lòng thử lại"
+        "Không thể lấy vị trí hoặc hoàn tất đăng ký"
       );
     }
   };
@@ -32,6 +87,7 @@ const { submitOnboarding, loading } = useSubmitOnboarding(); // GRAPHQL
           title="Hoàn tất"
           onPress={onFinish}
           fullWidth
+          disabled={loading}
         />
       }
     >

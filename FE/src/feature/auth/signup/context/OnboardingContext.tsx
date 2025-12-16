@@ -9,19 +9,30 @@ type OnboardingContextType = {
 
 const OnboardingContext = createContext<OnboardingContextType | null>(null);
 
+const defaultOnboardingData: OnboardingData = {
+  name: "",
+  phone: "",
+  gender: undefined,
+  birthday: undefined,
+  habits: [],
+  interests: [],
+  preferenceGender: [],
+  photos: [],
+};
+
 export const OnboardingProvider = ({
   children,
 }: {
   children: React.ReactNode;
 }) => {
-  const [data, setData] = useState<OnboardingData>({});
+  const [data, setData] = useState<OnboardingData>(defaultOnboardingData);
 
   const update = (payload: Partial<OnboardingData>) => {
     setData((prev) => ({ ...prev, ...payload }));
   };
 
   const reset = () => {
-    setData({});
+    setData(defaultOnboardingData);
   };
 
   return (

@@ -14,9 +14,19 @@ export const VERIFY_OTP = gql`
   }
 `;
 export const SUBMIT_ONBOARDING = gql`
-  mutation SubmitOnboarding($input: OnboardingInput!) {
-    submitOnboarding(input: $input) {
-      id
+  mutation SubmitOnboarding(
+    $signupToken: String!
+    $input: OnboardingInput!
+  ) {
+    submitOnboarding(
+      signupToken: $signupToken
+      input: $input
+    ) {
+      accessToken
+      user {
+        id
+        phone
+      }
     }
   }
 `;

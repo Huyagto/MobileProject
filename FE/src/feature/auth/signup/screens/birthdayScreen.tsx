@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TextInput } from "react-native";
+import { View, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { createStyles } from "@/themes/helper/createStyles";
@@ -10,18 +10,17 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 import OnboardingProgress from "../components/OnboardingProgress";
 import { ONBOARDING_TOTAL_STEPS } from "../constants";
+import { useOnboarding } from "../context/OnboardingContext";
 
 const useStyles = createStyles((theme) => ({
   backBtn: {
     marginBottom: theme.spacing.lg,
   },
-
   dateRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: theme.spacing.xl,
   },
-
   input: {
     width: "30%",
     height: 52,
@@ -38,6 +37,7 @@ const useStyles = createStyles((theme) => ({
 const BirthdayScreen = ({ navigation }: any) => {
   const styles = useStyles();
   const theme = useTheme();
+  const { update } = useOnboarding(); // 🔥 QUAN TRỌNG
 
   const [day, setDay] = useState("");
   const [month, setMonth] = useState("");
@@ -48,24 +48,60 @@ const BirthdayScreen = ({ navigation }: any) => {
     month.length === 2 &&
     year.length === 4;
 
+  const onNext = () => {
+  const d = Number(day);
+  const m = Number(month) - 1;
+  const y = Number(year);
+
+  // 1️⃣ Validate basic
+  if (
+    d < 1 || d > 31 ||
+    m < 0 || m > 11 ||
+    y < 1900 || y > new Date().getFullYear()
+  ) {
+    Alert.alert("Ngày sinh không hợp lệ");
+    return;
+  }
+
+  const date = new Date(y, m, d);
+
+  // 2️⃣ Validate future date
+  if (date > new Date()) {
+    Alert.alert("Ngày sinh không thể ở tương lai");
+    return;
+  }
+
+  // 3️⃣ (Optional) Validate age >= 18
+  const age =
+    new Date().getFullYear() - date.getFullYear();
+  if (age < 18) {
+    Alert.alert("Bạn phải đủ 18 tuổi");
+    return;
+  }
+
+  update({
+    birthday: date.toISOString(), // ✅ CHỈ LÚC NÀY MỚI UPDATE
+  });
+
+  navigation.navigate("Gender");
+};
   return (
     <OnboardingLayout
-    progress={
-    <OnboardingProgress
-      current={3}
-      total={ONBOARDING_TOTAL_STEPS}
-    />
-  }
+      progress={
+        <OnboardingProgress
+          current={3}
+          total={ONBOARDING_TOTAL_STEPS}
+        />
+      }
       footer={
         <Button
           title="Tiếp tục"
-          onPress={() => navigation.navigate("Gender")}
+          onPress={onNext}
           disabled={!isValid}
           fullWidth
         />
       }
     >
-      {/* BACK */}
       <Ionicons
         name="chevron-back"
         size={28}
@@ -74,14 +110,11 @@ const BirthdayScreen = ({ navigation }: any) => {
         style={styles.backBtn}
       />
 
-      {/* HEADER */}
       <Text variant="h1">Ngày sinh của bạn?</Text>
-
       <Text variant="body">
         Hãy nhập thông tin thật để mọi người tin tưởng hơn.
       </Text>
 
-      {/* DATE INPUTS */}
       <View style={styles.dateRow}>
         <TextInput
           style={styles.input}
@@ -92,7 +125,6 @@ const BirthdayScreen = ({ navigation }: any) => {
           value={day}
           onChangeText={setDay}
         />
-
         <TextInput
           style={styles.input}
           maxLength={2}
@@ -102,7 +134,6 @@ const BirthdayScreen = ({ navigation }: any) => {
           value={month}
           onChangeText={setMonth}
         />
-
         <TextInput
           style={styles.input}
           maxLength={4}

@@ -10,6 +10,7 @@ import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 import OnboardingProgress from "../components/OnboardingProgress";
 import { ONBOARDING_TOTAL_STEPS } from "../constants";
+import { useOnboarding } from "../context/OnboardingContext";
 
 const OPTIONS = ["Nam", "Nữ", "Khác"] as const;
 
@@ -34,8 +35,14 @@ const useStyles = createStyles((theme) => ({
 const GenderScreen = ({ navigation }: any) => {
   const styles = useStyles();
   const theme = useTheme();
+  const { update } = useOnboarding();
+    const [selected, setSelected] = useState<string>("");
+   const mapGender = (g: string): "male" | "female" | "other" => {
+    if (g === "Nam") return "male";
+    if (g === "Nữ") return "female";
+    return "other";
+  };
 
-  const [selected, setSelected] = useState<string>("");
 
   return (
     <OnboardingLayout
@@ -48,7 +55,10 @@ const GenderScreen = ({ navigation }: any) => {
       footer={
         <Button
           title="Tiếp tục"
-          onPress={() => navigation.navigate("UploadPhotos")}
+           onPress={() => {
+            update({ gender: mapGender(selected) });// 🔥 CHỖ QUYẾT ĐỊNH
+            navigation.navigate("UploadPhotos");
+          }}
           disabled={!selected}
           fullWidth
         />
