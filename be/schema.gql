@@ -1,0 +1,111 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Conversation {
+  id: ID!
+  users: [ID!]!
+  lastMessage: String
+  updatedAt: DateTime!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Message {
+  id: ID!
+  conversationId: ID!
+  sender: ID!
+  content: String!
+  createdAt: DateTime!
+}
+
+type UserType {
+  id: ID!
+  phone: String!
+}
+
+type Match {
+  id: ID!
+  users: [UserType!]!
+  isBlocked: Boolean!
+  createdAt: DateTime!
+}
+
+type LikeResult {
+  matched: Boolean!
+  matchId: ID
+}
+
+type AuthResponse {
+  signupToken: String!
+}
+
+type AuthPayload {
+  accessToken: String!
+  user: UserType!
+}
+
+type LocationType {
+  type: String!
+  coordinates: [Float!]!
+}
+
+type Profile {
+  id: ID!
+  userId: ID!
+  name: String!
+  gender: String
+  birthday: String
+  preferenceGender: [String!]
+  interests: [String!]
+  habits: [String!]
+  photos: [String!]
+  bio: String
+  location: LocationType
+  distance: Float
+}
+
+type Query {
+  healthCheck: String!
+  myProfile: Profile
+  nearbyProfiles(distance: Int = 2000000): [Profile!]!
+  myConversations: [Conversation!]!
+  messages(conversationId: String!): [Message!]!
+  myMatches: [Match!]!
+  isMatched(otherUserId: String!): Boolean!
+}
+
+type Mutation {
+  sendSignupOtp(phone: String!): Boolean!
+  verifySignupOtp(phone: String!, otp: String!): AuthResponse!
+  submitOnboarding(signupToken: String!, input: OnboardingInput!): AuthPayload!
+  sendLoginOtp(phone: String!): Boolean!
+  verifyLoginOtp(phone: String!, otp: String!): AuthPayload!
+  updateProfile(name: String, gender: String, bio: String): Profile!
+  updateLocation(lat: Float!, lng: Float!): Profile!
+  submitOnboardingProfile(name: String!, gender: String!, birthday: String!, preferenceGender: [String!]!, interests: [String!]!, habits: [String!]!, photos: [String!]!): Profile!
+  getOrCreateConversation(otherUserId: String!): Conversation!
+  sendMessage(conversationId: String!, content: String!): Message!
+  blockMatch(matchId: String!): Match!
+  likeUser(toUserId: String!): LikeResult!
+  dislikeUser(toUserId: String!): Boolean!
+}
+
+input OnboardingInput {
+  name: String!
+  gender: String!
+  birthday: String!
+  interests: [String!]
+  habits: [String!]
+  preferenceGender: [String!]
+  photos: [String!]!
+  location: LocationInput
+}
+
+input LocationInput {
+  coordinates: [Float!]!
+}

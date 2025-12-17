@@ -5,48 +5,70 @@ export type ProfileDocument = Profile & Document;
 
 @Schema({ timestamps: true })
 export class Profile {
-  @Prop({ type: Types.ObjectId, ref: "User", required: true })
+  /* ======================
+     RELATION
+  ====================== */
+  @Prop({ type: Types.ObjectId, ref: "User", required: true, unique: true })
   userId: Types.ObjectId;
 
-  @Prop()
-  name: string;
+  /* ======================
+     BASIC INFO
+  ====================== */
+  @Prop({ trim: true })
+  name?: string;
+
+  @Prop({
+    enum: ["male", "female", "non_binary", "other"],
+  })
+  gender?: string;
 
   @Prop()
-  gender: string;
+  birthday?: Date;
+
+  /* ======================
+     MEDIA
+  ====================== */
+  @Prop({ type: [String], default: [] })
+  photos: string[]; // 🔥 URL ảnh (https)
 
   @Prop()
-  birthday: string;
+  avatar?: string; // 🔥 photos[0]
 
-  @Prop({ type: [String] })
-preferenceGender: string[];
+  /* ======================
+     PREFERENCES
+  ====================== */
+  @Prop({ type: [String], default: [] })
+  preferenceGender: string[];
 
-
-  @Prop({ type: [String] })
+  @Prop({ type: [String], default: [] })
   interests: string[];
 
- @Prop({ type: [String] })
-habit: string[];
+  @Prop({ type: [String], default: [] })
+  habits: string[]; // 🔥 FIX TÊN
+
+  /* ======================
+     LOCATION
+  ====================== */
   @Prop({
-  type: {
-    type: String,
-    enum: ["Point"],
-    required: true,
-    default: "Point",
-  },
-  coordinates: {
-    type: [Number],      // [lng, lat]
-    required: true,
-    default: [0, 0],     // ✅ FIX QUAN TRỌNG
-  },
-})
-location: {
-  type: "Point";
-  coordinates: [number, number];
-};
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number], // [lng, lat]
+    },
+  })
+  location?: {
+    type: "Point";
+    coordinates: [number, number];
+  };
 }
 
-/* 🔥 SCHEMA */
 export const ProfileSchema = SchemaFactory.createForClass(Profile);
 
-/* 🔥 INDEX PHẢI KHAI BÁO Ở ĐÂY – KHÔNG PHẢI TRONG @Prop */
+/* ======================
+   INDEXES
+====================== */
 ProfileSchema.index({ location: "2dsphere" });
+ProfileSchema.index({ userId: 1 });
