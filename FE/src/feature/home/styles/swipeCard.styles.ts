@@ -1,45 +1,62 @@
 import { createStyles } from "@/themes/helper/createStyles";
-import { Dimensions } from "react-native";
 
-const { width, height } = Dimensions.get("window");
-
-export const useStyles = createStyles((theme) => ({
+export const useStyles = createStyles(() => ({
+  /* ===== CARD WRAPPER ===== */
   card: {
-    width: width - 32,
-    height: height * 0.72,
-    borderRadius: theme.radius.xl,
+    flex: 1,
+    borderRadius: 28,
     overflow: "hidden",
-    backgroundColor: theme.colors.neutral900,
-    alignSelf: "center",
-    ...theme.shadows.lg,
+    backgroundColor: "#000",
   },
 
+  /* ===== IMAGE ===== */
   image: {
     width: "100%",
     height: "100%",
-    position: "absolute",
   },
 
+  /* ===== GRADIENT OVERLAY ===== */
   overlay: {
     position: "absolute",
     bottom: 0,
-    height: "45%",
     width: "100%",
+    height: "55%",
+    backgroundColor: "rgba(0,0,0,0.55)",
   },
 
+  /* ===== INFO ===== */
   info: {
     position: "absolute",
-    bottom: 24,
-    left: 20,
-    right: 20,
+    bottom: 26,
+    left: 22,
+    right: 22,
+  },
+
+  /* ===== NAME + DISTANCE ===== */
+  row: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
   },
 
   name: {
-    color: theme.colors.neutral0,
+    fontSize: 30,
+    fontWeight: "800",
+    color: "#fff",
   },
 
+  distance: {
+    fontSize: 13,
+    color: "#fff",
+    opacity: 0.75,
+  },
+
+  /* ===== BIO ===== */
   bio: {
-    color: theme.colors.neutral100,
     marginTop: 6,
+    fontSize: 15,
+    lineHeight: 20,
+    color: "#fff",
+    opacity: 0.85,
   },
 }));

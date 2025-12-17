@@ -29,3 +29,10 @@ export const countries: Country[] = [
   { code: "ES", dial: "+34", name: "Spain", flag: "🇪🇸" },
   { code: "IT", dial: "+39", name: "Italy", flag: "🇮🇹" },
 ];
+// src/utils/countries.ts
+export const getCountryByCode = (code?: string) => {
+  if (!code) return undefined;
+  return countries.find(
+    (c) => c.code === code.toUpperCase()
+  );
+};

@@ -1,7 +1,6 @@
 // src/features/auth/signin/screens/LoginPhoneScreen.tsx
 import React, { useState } from "react";
 import { View, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 import AuthLayout from "@/feature/auth/layouts/AuthLayout";
 import { Button } from "@/ui/Button";
@@ -26,37 +25,30 @@ const LoginPhoneScreen = ({ navigation }: any) => {
   const isValid = phone.replace(/\D/g, "").length >= 8;
 
   const onNext = async () => {
-  if (!isValid || loading) return;
+    if (!isValid || loading) return;
 
-  const normalizedPhone = normalizePhone(
-    country.dial,
-    phone
-  );
+    const normalizedPhone = normalizePhone(
+  country.dial,
+  phone
+);
 
-  try {
-    const res = await sendOtp(normalizedPhone);
+    try {
+      // ✅ Backend tự kiểm tra user tồn tại
+      await sendOtp(normalizedPhone);
 
-    // ❌ SĐT CHƯA TỒN TẠI → KHÔNG CHO LOGIN
-    if (!res.userExists) {
+      // ✅ Thành công → sang màn OTP
+      navigation.navigate("OTPVerify", {
+        phone: normalizedPhone,
+        flow: "signin",
+      });
+    } catch (err: any) {
+      // ❌ USER_NOT_FOUND → backend throw
       Alert.alert(
-        "Tài khoản chưa tồn tại",
-        "Vui lòng đăng ký trước"
+        "Không đăng nhập được",
+        "Số điện thoại chưa được đăng ký"
       );
-      return;
     }
-
-    // ✅ SĐT ĐÃ TỒN TẠI → SANG OTP
-    navigation.navigate("OTPVerify", {
-      phone: normalizedPhone,
-      flow: "signin",
-    });
-  } catch {
-    Alert.alert(
-      "Không gửi được OTP",
-      "Vui lòng thử lại"
-    );
-  }
-};
+  };
 
   return (
     <AuthLayout

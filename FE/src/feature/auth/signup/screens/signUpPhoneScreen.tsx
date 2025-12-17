@@ -43,42 +43,30 @@ const SignUpPhoneScreen = ({ navigation }: Nav) => {
   const isValid = phone.replace(/\D/g, "").length >= 8;
 
   const onNext = async () => {
-  console.log("CLICK NEXT");
-
   if (!isValid || loading) return;
 
   const normalizedPhone = normalizePhone(
     country.dial,
     phone
   );
-  console.log("NORMALIZED PHONE:", normalizedPhone);
 
   try {
-    const res = await sendOtp(normalizedPhone);
+    await sendOtp(normalizedPhone);
 
-    // ❌ ĐÃ TỒN TẠI → KHÔNG CHO SIGNUP
-    if (res.userExists) {
-      Alert.alert(
-        "Số điện thoại đã tồn tại",
-        "Vui lòng đăng nhập"
-      );
-      return;
-    }
-
-    // ✅ CHƯA TỒN TẠI → TIẾP TỤC SIGNUP
     update({ phone: normalizedPhone });
 
     navigation.navigate("OTPVerify", {
       phone: normalizedPhone,
       flow: "signup",
     });
-  } catch (e) {
+  } catch (e: any) {
     Alert.alert(
-      "Không gửi được OTP",
-      "Vui lòng thử lại"
+      "Số điện thoại đã tồn tại",
+      "Vui lòng đăng nhập"
     );
   }
 };
+
 
 
 

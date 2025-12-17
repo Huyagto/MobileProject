@@ -1,16 +1,13 @@
 import { gql } from "@apollo/client";
 
-/* ===== SEND OTP (DÙNG CHUNG) ===== */
-export const SEND_OTP = gql`
-  mutation SendOtp($phone: String!) {
-    sendOtp(phone: $phone) {
-      userExists
-    }
+/* ===== LOGIN: SEND OTP ===== */
+export const SEND_LOGIN_OTP = gql`
+  mutation SendLoginOtp($phone: String!) {
+    sendLoginOtp(phone: $phone)
   }
 `;
 
-
-/* ===== VERIFY OTP LOGIN ===== */
+/* ===== LOGIN: VERIFY OTP ===== */
 export const VERIFY_LOGIN_OTP = gql`
   mutation VerifyLoginOtp($phone: String!, $otp: String!) {
     verifyLoginOtp(phone: $phone, otp: $otp) {

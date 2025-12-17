@@ -22,14 +22,12 @@ const useStyles = createStyles((theme) => ({
   backBtn: {
     marginBottom: theme.spacing.lg,
   },
-
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
     marginTop: theme.spacing.xl,
     justifyContent: "space-between",
   },
-
   photoBox: {
     width: "48%",
     aspectRatio: 1,
@@ -40,12 +38,10 @@ const useStyles = createStyles((theme) => ({
     marginBottom: theme.spacing.md,
     overflow: "hidden",
   },
-
   image: {
     width: "100%",
     height: "100%",
   },
-
   removeBtn: {
     position: "absolute",
     top: 6,
@@ -56,17 +52,54 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
+/* =======================
+   UPLOAD API (FIXED)
+======================= */
+const uploadImage = async (localUri: string): Promise<string> => {
+  const formData = new FormData();
+
+  formData.append("file", {
+    uri: localUri,
+    name: "photo.jpg",
+    type: "image/jpeg",
+  } as any);
+
+  // ⚠️ Android emulator: 10.0.2.2
+  // ⚠️ Máy thật: IP LAN (vd: 192.168.1.5)
+  const res = await fetch("http://10.0.2.2:3000/upload", {
+    method: "POST",
+    body: formData, // ❗ KHÔNG set Content-Type
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.log("UPLOAD FAIL:", res.status, text);
+    throw new Error("Upload failed");
+  }
+
+  const data = await res.json();
+  return data.url; // ✅ URL public
+};
+
+/* =======================
+   COMPONENT
+======================= */
 const UploadPhotosScreen = ({ navigation }: any) => {
   const styles = useStyles();
   const theme = useTheme();
 
   const [photos, setPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+
   const { update } = useOnboarding();
+
+  /* ✅ Lưu URL ảnh vào onboarding context */
   useEffect(() => {
-  if (photos.length > 0) {
-    update({ photos });
-  }
-}, [photos]);
+    if (photos.length > 0) {
+      update({ photos });
+    }
+  }, [photos]);
+
   const hasPhoto = photos.length > 0;
 
   /* =======================
@@ -79,7 +112,7 @@ const UploadPhotosScreen = ({ navigation }: any) => {
     if (status !== "granted") {
       Alert.alert(
         "Cần quyền truy cập",
-        "Vui lòng cho phép truy cập thư viện ảnh"
+        "Vui lòng cho phép truy cập thư viện ảnh",
       );
       return;
     }
@@ -91,14 +124,23 @@ const UploadPhotosScreen = ({ navigation }: any) => {
       quality: 0.8,
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
+    if (result.canceled) return;
+
+    try {
+      setUploading(true);
+
+      const localUri = result.assets[0].uri;
+      const uploadedUrl = await uploadImage(localUri); // 🔥 UPLOAD
 
       setPhotos((prev) => {
         const next = [...prev];
-        next[index] = uri;
+        next[index] = uploadedUrl;
         return next.filter(Boolean).slice(0, MAX_PHOTOS);
       });
+    } catch (e) {
+      Alert.alert("Lỗi", "Không thể tải ảnh lên");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -111,17 +153,19 @@ const UploadPhotosScreen = ({ navigation }: any) => {
 
   return (
     <OnboardingLayout
-    progress={
-    <OnboardingProgress
-      current={4}
-      total={ONBOARDING_TOTAL_STEPS}
-    />
-  }
+      progress={
+        <OnboardingProgress
+          current={4}
+          total={ONBOARDING_TOTAL_STEPS}
+        />
+      }
       footer={
         <Button
-          title="Tiếp tục"
-          onPress={() => navigation.navigate("PreferenceGender")}
-          disabled={!hasPhoto}
+          title={uploading ? "Đang tải ảnh..." : "Tiếp tục"}
+          onPress={() =>
+            navigation.navigate("PreferenceGender")
+          }
+          disabled={!hasPhoto || uploading}
           fullWidth
         />
       }
@@ -137,7 +181,6 @@ const UploadPhotosScreen = ({ navigation }: any) => {
 
       {/* HEADER */}
       <Text variant="h1">Tải ảnh lên</Text>
-
       <Text variant="body">
         Hãy thêm ít nhất một ảnh để mọi người có thể nhận ra bạn.
       </Text>
@@ -152,10 +195,15 @@ const UploadPhotosScreen = ({ navigation }: any) => {
               key={i}
               style={styles.photoBox}
               onPress={() => pickImage(i)}
+              disabled={uploading}
             >
               {uri ? (
                 <>
-                  <Image source={{ uri }} style={styles.image} />
+                  <Image
+                    source={{ uri }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
                   <Pressable
                     style={styles.removeBtn}
                     onPress={() => removeImage(i)}

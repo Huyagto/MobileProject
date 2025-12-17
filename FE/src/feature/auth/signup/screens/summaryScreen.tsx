@@ -48,7 +48,7 @@ const SummaryScreen = ({ navigation }: any) => {
         birthday: data.birthday,
         preferenceGender: data.preferenceGender,
         interests: data.interests,
-        habit: data.habits,
+        habits: data.habits,
 
         // ✅ GEOJSON CHUẨN (Mongo 2dsphere)
         location: {
