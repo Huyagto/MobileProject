@@ -1,14 +1,14 @@
 {
   "expo": {
     "name": "FE",
-    "slug": "fe",
+    "slug": "FE",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./src/assets/icon.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,15 +22,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./src/assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.fe"
+      "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./src/assets/splash-icon.png"
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-video",

@@ -35,5 +35,4 @@ export class UserService {
   async findById(id: string | Types.ObjectId) {
     return this.userModel.findById(id);
   }
-  
 }

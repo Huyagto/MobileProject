@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
@@ -11,101 +11,67 @@ export class ProfileService {
     private readonly profileModel: Model<ProfileDocument>,
   ) {}
 
-  /* =========================
-     GET MY PROFILE
-  ========================== */
   async getByUser(userId: string | Types.ObjectId) {
-    return this.profileModel
-      .findOne({ userId: new Types.ObjectId(userId) })
-      .lean();
+    return this.profileModel.findOne({
+      userId: new Types.ObjectId(userId),
+    });
   }
 
-  /* =========================
-     CREATE / UPDATE PROFILE (ONBOARDING)
-  ========================== */
   async createOrUpdate(data: {
     userId: Types.ObjectId;
-    name?: string;
-    gender?: string;
-    birthday?: string; // ISO
-    preferenceGender?: string[];
-    interests?: string[];
-    habits?: string[];
-    photos?: string[];
-    location?: {
+    name: string;
+    gender: string;
+    birthday: string;
+    preferenceGender: string[];
+    interests: string[];
+    habit: string[];
+    location: {
       type: "Point";
       coordinates: [number, number];
     };
   }) {
-    const updateData: Partial<Profile> = {
-      name: data.name,
-      gender: data.gender,
-      preferenceGender: data.preferenceGender ?? [],
-      interests: data.interests ?? [],
-      habits: data.habits ?? [],
-    };
+    let profile = await this.profileModel.findOne({
+      userId: data.userId,
+    });
 
-    if (data.birthday) {
-      const d = new Date(data.birthday);
-      if (!isNaN(d.getTime())) {
-        updateData.birthday = d;
+    if (!profile) {
+      profile = new this.profileModel(data);
+    } else {
+      profile.name = data.name;
+      profile.gender = data.gender;
+      profile.birthday = data.birthday;
+      profile.preferenceGender = data.preferenceGender;
+      profile.interests = data.interests;
+      profile.habit = data.habit;
+
+      if (data.location?.coordinates?.length === 2) {
+        profile.location = data.location;
       }
     }
 
-    if (data.photos?.length) {
-      updateData.photos = data.photos;
-      updateData.avatar = data.photos[0]; // 🔥 avatar = ảnh đầu
-    }
-
-    if (data.location?.coordinates?.length === 2) {
-      updateData.location = data.location;
-    }
-
-    const profile = await this.profileModel.findOneAndUpdate(
-      { userId: data.userId },
-      {
-        $set: updateData,
-        $setOnInsert: { userId: data.userId },
-      },
-      {
-        new: true,
-        upsert: true,
-      },
-    );
-
+    await profile.save();
     return profile;
   }
-
-  /* =========================
-     UPDATE BASIC PROFILE
-  ========================== */
   async updateBasicProfile(
-    userId: string | Types.ObjectId,
-    data: {
-      name?: string;
-      gender?: string;
-      bio?: string;
-    },
-  ) {
-    return this.profileModel.findOneAndUpdate(
-      { userId: new Types.ObjectId(userId) },
-      { $set: data },
-      { new: true },
-    );
-  }
+  userId: string | Types.ObjectId,
+  data: {
+    name?: string;
+    gender?: string;
+    bio?: string;
+  },
+) {
+  return this.profileModel.findOneAndUpdate(
+    { userId: new Types.ObjectId(userId) },
+    { $set: data },
+    { new: true },
+  );
+}
 
-  /* =========================
-     UPDATE LOCATION
-  ========================== */
   async updateLocation(
     userId: string | Types.ObjectId,
     lat: number,
     lng: number,
   ) {
-    if (typeof lat !== "number" || typeof lng !== "number") {
-      throw new BadRequestException("Invalid coordinates");
-    }
-
     return this.profileModel.findOneAndUpdate(
       { userId: new Types.ObjectId(userId) },
       {
@@ -120,50 +86,38 @@ export class ProfileService {
     );
   }
 
-  /* =========================
-     FIND NEARBY PROFILES (SWIPE)
-  ========================== */
-  async findNearbyProfilesByUser(
-    userId: Types.ObjectId,
-    maxDistance = 2_000_000,
-  ) {
-    const me = await this.profileModel
-      .findOne({ userId })
-      .select("location")
-      .lean();
+  async findNearbyProfiles(params: {
+    userId: Types.ObjectId;
+    lat: number;
+    lng: number;
+    maxDistance?: number;
+    preferenceGender?: string;
+  }) {
+    const {
+      userId,
+      lat,
+      lng,
+      maxDistance = 5000,
+      preferenceGender,
+    } = params;
 
-    if (!me?.location?.coordinates) {
-      throw new BadRequestException("Profile has no location");
-    }
-
-    const [lng, lat] = me.location.coordinates;
-
-    return this.profileModel.aggregate([
-      {
-        $geoNear: {
-          key: "location",
-          near: {
+    const query: any = {
+      userId: { $ne: new Types.ObjectId(userId) },
+      location: {
+        $near: {
+          $geometry: {
             type: "Point",
             coordinates: [lng, lat],
           },
-          distanceField: "distance",
-          maxDistance,
-          spherical: true,
-          query: {
-            userId: { $ne: userId },
-            avatar: { $exists: true, $ne: null }, // 🔥 chỉ profile có ảnh
-          },
+          $maxDistance: maxDistance,
         },
       },
-      {
-        $sort: {
-          distance: 1,
-          createdAt: -1,
-        },
-      },
-      {
-        $limit: 50,
-      },
-    ]);
+    };
+
+    if (preferenceGender && preferenceGender !== "Tất cả") {
+      query.gender = preferenceGender;
+    }
+
+    return this.profileModel.find(query).limit(50);
   }
 }

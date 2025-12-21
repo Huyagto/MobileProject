@@ -1,13 +1,5 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  Int,
-  Float,
-} from "@nestjs/graphql";
+import { Resolver, Query, Mutation, Args, Int, Float } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
-import { Types } from "mongoose";
 
 import { ProfileService } from "./profile.service";
 import { Profile } from "./profile.type";
@@ -15,17 +7,11 @@ import { Profile } from "./profile.type";
 import { GqlAuthGuard } from "../../common/guards/gql-auth.guard";
 import { CurrentUser } from "../../common/decorators/current-user.decorator";
 
-/* ======================
-   TYPES
-====================== */
 type JwtUser = {
   id: string;
   phone: string;
 };
 
-/* ======================
-   INPUT TYPES
-====================== */
 @Resolver(() => Profile)
 export class ProfileResolver {
   constructor(
@@ -40,9 +26,7 @@ export class ProfileResolver {
   myProfile(
     @CurrentUser() user: JwtUser,
   ) {
-    return this.profileService.getByUser(
-      new Types.ObjectId(user.id),
-    );
+    return this.profileService.getByUser(user.id);
   }
 
   /* =========================
@@ -56,10 +40,11 @@ export class ProfileResolver {
     @Args("gender", { nullable: true }) gender?: string,
     @Args("bio", { nullable: true }) bio?: string,
   ) {
-    return this.profileService.updateBasicProfile(
-      new Types.ObjectId(user.id),
-      { name, gender, bio },
-    );
+    return this.profileService.updateBasicProfile(user.id, {
+      name,
+      gender,
+      bio,
+    });
   }
 
   /* =========================
@@ -72,61 +57,29 @@ export class ProfileResolver {
     @Args("lat", { type: () => Float }) lat: number,
     @Args("lng", { type: () => Float }) lng: number,
   ) {
-    return this.profileService.updateLocation(
-      new Types.ObjectId(user.id),
-      lat,
-      lng,
-    );
+    return this.profileService.updateLocation(user.id, lat, lng);
   }
 
   /* =========================
-     SUBMIT ONBOARDING PROFILE
-  ========================== */
-  @UseGuards(GqlAuthGuard)
-  @Mutation(() => Profile)
-  submitOnboardingProfile(
-    @CurrentUser() user: JwtUser,
-    @Args("name") name: string,
-    @Args("gender") gender: string,
-    @Args("birthday") birthday: string,
-    @Args("preferenceGender", { type: () => [String] })
-    preferenceGender: string[],
-    @Args("interests", { type: () => [String] })
-    interests: string[],
-    @Args("habits", { type: () => [String] })
-    habits: string[],
-    @Args("photos", { type: () => [String] })
-    photos: string[],
-  ) {
-    return this.profileService.createOrUpdate({
-      userId: new Types.ObjectId(user.id),
-      name,
-      gender,
-      birthday,
-      preferenceGender,
-      interests,
-      habits,
-      photos,
-    });
-  }
-
-  /* =========================
-     FIND NEARBY PROFILES (SWIPE)
+     FIND NEARBY PROFILES
   ========================== */
   @UseGuards(GqlAuthGuard)
   @Query(() => [Profile])
   nearbyProfiles(
     @CurrentUser() user: JwtUser,
-    @Args("distance", {
-      type: () => Int,
-      nullable: true,
-      defaultValue: 2_000_000,
-    })
-    distance: number,
+    @Args("lat", { type: () => Float }) lat: number,
+    @Args("lng", { type: () => Float }) lng: number,
+    @Args("distance", { type: () => Int, nullable: true })
+    distance?: number,
+    @Args("preferenceGender", { nullable: true })
+    preferenceGender?: string,
   ) {
-    return this.profileService.findNearbyProfilesByUser(
-      new Types.ObjectId(user.id),
-      distance,
-    );
+    return this.profileService.findNearbyProfiles({
+      userId: user.id as any,
+      lat,
+      lng,
+      maxDistance: distance,
+      preferenceGender,
+    });
   }
 }

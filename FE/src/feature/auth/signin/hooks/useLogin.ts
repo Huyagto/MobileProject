@@ -1,13 +1,13 @@
 import { useMutation } from "@apollo/client";
 import * as SecureStore from "expo-secure-store";
 import {
-  SEND_LOGIN_OTP,
+  SEND_OTP,
   VERIFY_LOGIN_OTP,
 } from "../graphql/auth.graphql";
 
 export function useLogin() {
-  const [sendLoginOtpMutation, sendState] =
-    useMutation(SEND_LOGIN_OTP);
+  const [sendOtpMutation, sendState] =
+    useMutation(SEND_OTP);
 
   const [verifyOtpMutation, verifyState] =
     useMutation(VERIFY_LOGIN_OTP);
@@ -17,11 +17,16 @@ export function useLogin() {
     try {
       console.log("SEND LOGIN OTP:", phone);
 
-      await sendLoginOtpMutation({
+      const res = await sendOtpMutation({
         variables: { phone },
       });
 
-      return true;
+      console.log("SEND LOGIN OTP RES:", res.data);
+
+      // 🔑 LẤY userExists TỪ BACKEND
+      return res.data?.sendOtp as {
+        userExists: boolean;
+      };
     } catch (err) {
       console.log("SEND LOGIN OTP ERROR:", err);
       throw err;
@@ -37,6 +42,8 @@ export function useLogin() {
         variables: { phone, otp },
       });
 
+      console.log("LOGIN VERIFY RES:", res.data);
+
       const accessToken =
         res.data?.verifyLoginOtp?.accessToken;
 
@@ -49,7 +56,7 @@ export function useLogin() {
         accessToken
       );
 
-      return res.data.verifyLoginOtp;
+      return res.data?.verifyLoginOtp;
     } catch (err) {
       console.log("VERIFY LOGIN OTP ERROR:", err);
       throw err;

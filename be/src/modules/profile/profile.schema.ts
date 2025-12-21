@@ -5,70 +5,48 @@ export type ProfileDocument = Profile & Document;
 
 @Schema({ timestamps: true })
 export class Profile {
-  /* ======================
-     RELATION
-  ====================== */
-  @Prop({ type: Types.ObjectId, ref: "User", required: true, unique: true })
+  @Prop({ type: Types.ObjectId, ref: "User", required: true })
   userId: Types.ObjectId;
 
-  /* ======================
-     BASIC INFO
-  ====================== */
-  @Prop({ trim: true })
-  name?: string;
-
-  @Prop({
-    enum: ["male", "female", "non_binary", "other"],
-  })
-  gender?: string;
+  @Prop()
+  name: string;
 
   @Prop()
-  birthday?: Date;
-
-  /* ======================
-     MEDIA
-  ====================== */
-  @Prop({ type: [String], default: [] })
-  photos: string[]; // 🔥 URL ảnh (https)
+  gender: string;
 
   @Prop()
-  avatar?: string; // 🔥 photos[0]
+  birthday: string;
 
-  /* ======================
-     PREFERENCES
-  ====================== */
-  @Prop({ type: [String], default: [] })
-  preferenceGender: string[];
+  @Prop({ type: [String] })
+preferenceGender: string[];
 
-  @Prop({ type: [String], default: [] })
+
+  @Prop({ type: [String] })
   interests: string[];
 
-  @Prop({ type: [String], default: [] })
-  habits: string[]; // 🔥 FIX TÊN
-
-  /* ======================
-     LOCATION
-  ====================== */
+ @Prop({ type: [String] })
+habit: string[];
   @Prop({
-    type: {
-      type: String,
-      enum: ["Point"],
-      default: "Point",
-    },
-    coordinates: {
-      type: [Number], // [lng, lat]
-    },
-  })
-  location?: {
-    type: "Point";
-    coordinates: [number, number];
-  };
+  type: {
+    type: String,
+    enum: ["Point"],
+    required: true,
+    default: "Point",
+  },
+  coordinates: {
+    type: [Number],      // [lng, lat]
+    required: true,
+    default: [0, 0],     // ✅ FIX QUAN TRỌNG
+  },
+})
+location: {
+  type: "Point";
+  coordinates: [number, number];
+};
 }
 
+/* 🔥 SCHEMA */
 export const ProfileSchema = SchemaFactory.createForClass(Profile);
 
-/* ======================
-   INDEXES
-====================== */
+/* 🔥 INDEX PHẢI KHAI BÁO Ở ĐÂY – KHÔNG PHẢI TRONG @Prop */
 ProfileSchema.index({ location: "2dsphere" });
-ProfileSchema.index({ userId: 1 });

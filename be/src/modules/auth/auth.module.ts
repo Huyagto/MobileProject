@@ -11,28 +11,19 @@ import { ProfileModule } from '../profile/profile.module';
 
 @Module({
   imports: [
-    RedisModule,
-    UsersModule,
-    SmsModule,
+    RedisModule,        
+    UsersModule,      
+    SmsModule,  
+    PassportModule,
     ProfileModule,
-
-    // 🔥 BẮT BUỘC REGISTER JWT STRATEGY
-    PassportModule.register({
-      defaultStrategy: 'jwt',
-    }),
-
     JwtModule.register({
       secret: 'DEV_SECRET_KEY',
       signOptions: { expiresIn: '7d' },
     }),
   ],
-  providers: [
-    AuthService,
-    AuthResolver,
-    JwtStrategy, // 🔥 BẮT BUỘC
-  ],
-  exports: [
-    PassportModule, // 🔥 ĐỂ MODULE KHÁC DÙNG AuthGuard
-  ],
+  providers: [AuthService, 
+              AuthResolver,
+              JwtStrategy]
+
 })
 export class AuthModule {}

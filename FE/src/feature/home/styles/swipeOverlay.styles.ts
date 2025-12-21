@@ -1,37 +1,23 @@
-import { StyleSheet } from "react-native";
+import { createStyles } from "@/themes/helper/createStyles";
 
-export default StyleSheet.create({
-  like: {
-    position: "absolute",
-    top: 60,
-    left: 24,
-    borderWidth: 3,
-    borderColor: "#4be3ac",
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
+const useStyles = (type: "like" | "nope") =>
+  createStyles((theme) => ({
+    container: {
+      position: "absolute",
+      top: 40,
+      left: type === "like" ? 20 : undefined,
+      right: type === "nope" ? 20 : undefined,
 
-  nope: {
-    position: "absolute",
-    top: 60,
-    right: 24,
-    borderWidth: 3,
-    borderColor: "#ff4458",
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
+      borderWidth: 2,
+      borderColor:
+        type === "like"
+          ? theme.colors.primary
+          : theme.colors.secondary, // ✅ dùng secondary thay error
 
-  likeText: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#4be3ac",
-  },
+      padding: theme.spacing.md,
+      borderRadius: theme.radius.md,
+      backgroundColor: theme.colors.neutral0,
+    },
+  }))();
 
-  nopeText: {
-    fontSize: 24,
-    fontWeight: "800",
-    color: "#ff4458",
-  },
-});
+export default useStyles;

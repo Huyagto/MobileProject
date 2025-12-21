@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, Float } from "@nestjs/graphql";
+import { ObjectType, Field, ID } from "@nestjs/graphql";
 
 /* ======================
    LOCATION TYPE
@@ -6,9 +6,9 @@ import { ObjectType, Field, ID, Float } from "@nestjs/graphql";
 @ObjectType()
 export class LocationType {
   @Field()
-  type: string; // "Point"
+  type: "Point"; // "Point"
 
-  @Field(() => [Float])
+  @Field(() => [Number])
   coordinates: number[]; // [lng, lat]
 }
 
@@ -20,9 +20,6 @@ export class Profile {
   @Field(() => ID)
   id: string;
 
-  @Field(() => ID)
-  userId: string;
-
   @Field()
   name: string;
 
@@ -32,24 +29,22 @@ export class Profile {
   @Field({ nullable: true })
   birthday?: string;
 
+  // ✅ FIX: ARRAY
   @Field(() => [String], { nullable: true })
   preferenceGender?: string[];
 
+  // ✅ FIX: ARRAY
   @Field(() => [String], { nullable: true })
   interests?: string[];
 
+  // ✅ FIX: ARRAY
   @Field(() => [String], { nullable: true })
-  habits?: string[];
-
-  @Field(() => [String], { nullable: true })
-  photos?: string[];
+  habit?: string[];
 
   @Field({ nullable: true })
   bio?: string;
 
+  // ✅ ADD LOCATION
   @Field(() => LocationType, { nullable: true })
   location?: LocationType;
-
-  @Field(() => Float, { nullable: true })
-  distance?: number;
 }

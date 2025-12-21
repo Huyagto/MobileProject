@@ -1,11 +1,5 @@
 import React, { useState } from "react";
-import {
-  View,
-  TextInput,
-  Pressable,
-  Platform,
-  TouchableOpacity,
-} from "react-native";
+import { View, TextInput, Pressable } from "react-native";
 
 import { createStyles } from "@/themes/helper/createStyles";
 import { useTheme } from "@/themes/themeContext";
@@ -23,22 +17,13 @@ type Props = {
 const useStyles = createStyles((theme) => ({
   wrapper: {
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.md,
     paddingHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.background,
-
-    // 🔥 FIX ANDROID TOUCH + RIPPLE
-    overflow: "hidden",
+    backgroundColor: theme.colors.neutral50,
   },
 
   focused: {
     borderColor: theme.colors.primary,
-    shadowColor: theme.colors.primary,
-    shadowOpacity: 0.12,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
 
   row: {
@@ -53,15 +38,12 @@ const useStyles = createStyles((theme) => ({
     marginRight: theme.spacing.md,
     borderRightWidth: 1,
     borderRightColor: theme.colors.border,
-
-    // 🔥 QUAN TRỌNG: KHÔNG CHO GIÃN ĂN TOUCH
-    flexShrink: 0,
   },
 
   phoneInput: {
     flex: 1,
     fontSize: 18,
-    paddingVertical: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
     color: theme.colors.text,
   },
 }));
@@ -84,18 +66,14 @@ const PhoneInput = ({
       ]}
     >
       <View style={styles.row}>
-        {/* ===== COUNTRY PICKER ===== */}
-        <TouchableOpacity
-          onPress={openPicker}
-          style={styles.countryBtn}
-          activeOpacity={0.6}
-        >
+        {/* COUNTRY */}
+        <Pressable onPress={openPicker} style={styles.countryBtn}>
           <Text variant="body">
             {country.flag} {country.dial}
           </Text>
-        </TouchableOpacity>
+        </Pressable>
 
-        {/* ===== PHONE INPUT ===== */}
+        {/* PHONE */}
         <TextInput
           style={styles.phoneInput}
           value={phone}
@@ -107,12 +85,6 @@ const PhoneInput = ({
           placeholderTextColor={theme.colors.textMuted}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          returnKeyType="done"
-          textContentType={
-            Platform.OS === "ios"
-              ? "telephoneNumber"
-              : "none"
-          }
         />
       </View>
     </View>

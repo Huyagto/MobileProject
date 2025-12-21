@@ -2,51 +2,10 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type Conversation {
-  id: ID!
-  users: [ID!]!
-  lastMessage: String
-  updatedAt: DateTime!
-  createdAt: DateTime!
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type Message {
-  id: ID!
-  conversationId: ID!
-  sender: ID!
-  content: String!
-  createdAt: DateTime!
-}
-
 type UserType {
   id: ID!
   phone: String!
-}
-
-type Match {
-  id: ID!
-  users: [UserType!]!
-  isBlocked: Boolean!
-  createdAt: DateTime!
-}
-
-type LikeResult {
-  matched: Boolean!
-  matchId: ID
-}
-
-type AuthResponse {
-  signupToken: String!
-}
-
-type AuthPayload {
-  accessToken: String!
-  user: UserType!
+  profile: Profile
 }
 
 type LocationType {
@@ -69,14 +28,23 @@ type Profile {
   distance: Float
 }
 
+type UploadResult {
+  url: String!
+}
+
+type AuthResponse {
+  signupToken: String!
+}
+
+type AuthPayload {
+  accessToken: String!
+  user: UserType!
+}
+
 type Query {
   healthCheck: String!
   myProfile: Profile
   nearbyProfiles(distance: Int = 2000000): [Profile!]!
-  myConversations: [Conversation!]!
-  messages(conversationId: String!): [Message!]!
-  myMatches: [Match!]!
-  isMatched(otherUserId: String!): Boolean!
 }
 
 type Mutation {
@@ -87,12 +55,8 @@ type Mutation {
   verifyLoginOtp(phone: String!, otp: String!): AuthPayload!
   updateProfile(name: String, gender: String, bio: String): Profile!
   updateLocation(lat: Float!, lng: Float!): Profile!
+  uploadProfilePhoto(file: Upload!): UploadResult!
   submitOnboardingProfile(name: String!, gender: String!, birthday: String!, preferenceGender: [String!]!, interests: [String!]!, habits: [String!]!, photos: [String!]!): Profile!
-  getOrCreateConversation(otherUserId: String!): Conversation!
-  sendMessage(conversationId: String!, content: String!): Message!
-  blockMatch(matchId: String!): Match!
-  likeUser(toUserId: String!): LikeResult!
-  dislikeUser(toUserId: String!): Boolean!
 }
 
 input OnboardingInput {
@@ -107,5 +71,9 @@ input OnboardingInput {
 }
 
 input LocationInput {
+  type: String! = "Point"
   coordinates: [Float!]!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
