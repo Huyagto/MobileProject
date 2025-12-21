@@ -1,9 +1,18 @@
+// src/modules/auth/auth.resolver.ts
 import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
 import { AuthService } from "./auth.service";
 import { AuthResponse } from "./dto/auth-response.type";
 import { AuthPayload } from "./dto/auth.payload";
 import { OnboardingInput } from "./dto/onboarding.input";
 import { SendOtpResponse } from "./dto/send-otp.response";
+import { UploadScalar } from "@/common/scalars/upload.scalar";
+
+interface FileUpload {
+  filename: string;
+  mimetype: string;
+  encoding: string;
+  createReadStream: () => NodeJS.ReadableStream;
+}
 
 @Resolver()
 export class AuthResolver {
@@ -40,10 +49,19 @@ export class AuthResolver {
 
   /* ===== SUBMIT ONBOARDING ===== */
   @Mutation(() => AuthPayload)
-  submitOnboarding(
+  async submitOnboarding(
     @Args("signupToken") signupToken: string,
     @Args("input") input: OnboardingInput,
   ) {
     return this.authService.submitOnboarding(signupToken, input);
+  }
+
+  /* ===== TEST UPLOAD (Optional) ===== */
+  @Mutation(() => String)
+  async testUpload(
+    @Args({ name: 'file', type: () => UploadScalar }) file: Promise<FileUpload>,
+  ) {
+    const { filename, mimetype, encoding } = await file;
+    return `File ${filename} uploaded successfully! Type: ${mimetype}, Encoding: ${encoding}`;
   }
 }

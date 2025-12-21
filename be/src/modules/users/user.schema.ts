@@ -1,3 +1,4 @@
+// src/modules/users/user.schema.ts
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document } from "mongoose";
 
@@ -5,10 +6,11 @@ import { Document } from "mongoose";
 export class User {
   @Prop({ required: true, unique: true })
   phone: string;
+  
+  // Explicitly declare timestamps
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-/* ✅ KIỂU DOCUMENT CHUẨN */
 export type UserDocument = User & Document;
-
-/* ✅ SCHEMA – CHỈ KHAI BÁO 1 LẦN */
 export const UserSchema = SchemaFactory.createForClass(User);

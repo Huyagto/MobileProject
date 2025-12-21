@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+// src/modules/users/user.service.ts
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { User, UserDocument } from "./user.schema";
@@ -10,29 +11,26 @@ export class UserService {
     private readonly userModel: Model<UserDocument>,
   ) {}
 
-  /* ======================
-     FIND BY PHONE
-  ====================== */
   async findByPhone(phone: string): Promise<UserDocument | null> {
     return this.userModel.findOne({ phone });
   }
 
-  /* ======================
-     CREATE USER
-  ====================== */
   async create(data: { phone: string }): Promise<UserDocument> {
     const user = new this.userModel({
       phone: data.phone,
-      createdAt: new Date(),
     });
-
     return user.save();
   }
 
-  /* ======================
-     FIND BY ID (DÙNG SAU)
-  ====================== */
-  async findById(id: string | Types.ObjectId) {
-    return this.userModel.findById(id);
+  // src/modules/users/user.service.ts
+async findById(id: string | Types.ObjectId): Promise<UserDocument> {
+  const objectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
+  const user = await this.userModel.findById(objectId).exec();
+  
+  if (!user) {
+    throw new NotFoundException(`User with ID ${id} not found`);
   }
+  
+  return user;
+}
 }

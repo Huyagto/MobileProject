@@ -1,0 +1,164 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type AuthResponse {
+  signupToken: String!
+}
+
+type UserType {
+  id: ID!
+  phone: String!
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AuthPayload {
+  accessToken: String!
+  user: UserType!
+}
+
+type SendOtpResponse {
+  userExists: Boolean!
+}
+
+type ProfilePhoto {
+  url: String!
+  publicId: String
+  order: Int!
+  isVerified: Boolean!
+  caption: String
+  uploadedAt: DateTime!
+}
+
+type Location {
+  type: String!
+  coordinates: [Float!]!
+}
+
+type Profile {
+  id: ID!
+  userId: String!
+  name: String!
+  gender: String!
+  birthday: DateTime!
+  preferenceGender: [String!]!
+  interests: [String!]
+  habits: [String!]
+  bio: String
+  location: Location
+  photos: [ProfilePhoto!]!
+  photoCount: Int!
+  age: Int!
+  isActive: Boolean!
+  isVerified: Boolean!
+  lastActive: DateTime!
+  hasPremium: Boolean!
+  premiumUntil: DateTime
+  popularityScore: Int!
+  distance: Float
+  user: UserType!
+}
+
+type SwipeProfile {
+  id: ID!
+  name: String!
+  age: Int!
+  bio: String
+  photos: [ProfilePhoto!]!
+  distance: Float
+  interests: [String!]
+  habits: [String!]
+}
+
+type ProfileStats {
+  totalViews: Int!
+  totalLikes: Int!
+  totalMatches: Int!
+  profileCompletion: Int!
+  lastActive: DateTime
+}
+
+"""File upload scalar type"""
+scalar Upload
+
+type Query {
+  healthCheck: String!
+  myProfile: Profile
+  getProfilesToSwipe(input: GetProfilesInput!): [SwipeProfile!]!
+  nearbyProfiles(lat: Float!, lng: Float!, distance: Int! = 20, limit: Int! = 50): [Profile!]!
+  getProfileStats: ProfileStats!
+}
+
+input GetProfilesInput {
+  limit: Int! = 20
+  distance: Float! = 50
+  minAge: Int
+  maxAge: Int
+}
+
+type Mutation {
+  sendOtp(phone: String!): SendOtpResponse!
+  verifySignupOtp(phone: String!, otp: String!): AuthResponse!
+  verifyLoginOtp(phone: String!, otp: String!): AuthPayload!
+  submitOnboarding(signupToken: String!, input: OnboardingInput!): AuthPayload!
+  testUpload(file: Upload!): String!
+  createProfile(input: CreateProfileInput!): Profile!
+  updateProfile(input: UpdateProfileInput!): Profile!
+  updateBasicProfile(name: String, bio: String, interests: [String!], habits: [String!]): Profile!
+  uploadProfilePhoto(file: Upload!, input: UploadPhotoInput): Profile!
+  deleteProfilePhoto(publicId: String!): Profile!
+  reorderPhotos(input: ReorderPhotosInput!): Profile!
+  updateLocation(lat: Float!, lng: Float!): Profile!
+  deactivateProfile: Profile!
+  activateProfile: Profile!
+  verifyProfile: Profile!
+}
+
+input OnboardingInput {
+  name: String!
+  gender: String!
+  birthday: String!
+  preferenceGender: String!
+  interests: [String!]
+  habits: [String!]
+  bio: String
+  coordinates: [Float!]
+  photos: [Upload!]!
+}
+
+input CreateProfileInput {
+  name: String!
+  gender: String!
+  birthday: DateTime!
+  preferenceGender: [String!]!
+  interests: [String!]
+  habits: [String!]
+  bio: String
+  coordinates: [Float!]!
+}
+
+input UpdateProfileInput {
+  name: String
+  bio: String
+  interests: [String!]
+  habits: [String!]
+  jobTitle: String
+  education: String
+  languages: [String!]
+  coordinates: [Float!]
+}
+
+input UploadPhotoInput {
+  caption: String
+  order: Int
+}
+
+input ReorderPhotosInput {
+  photoPublicIds: [String!]!
+}
